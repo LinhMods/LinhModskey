@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Shop Demo</title>
+<style>
+body { font-family: Arial; background:#111; color:#fff; text-align:center }
+.box { background:#222; padding:20px; margin:20px; border-radius:10px }
+input, button { padding:8px; margin:5px }
+</style>
+</head>
+<body>
+
+<div id="auth" class="box">
+  <h2>Đăng nhập / Đăng ký</h2>
+  <input id="user" placeholder="Tài khoản"><br>
+  <input id="pass" type="password" placeholder="Mật khẩu"><br>
+  <button onclick="register()">Đăng ký</button>
+  <button onclick="login()">Đăng nhập</button>
+</div>
+
+<div id="shop" class="box" style="display:none">
+  <h2>Xin chào <span id="name"></span></h2>
+  <p>Số dư: <b id="money">0</b> đ</p>
+
+  <h3>Nạp thẻ (demo)</h3>
+  <input id="card" placeholder="Nhập mã thẻ"><br>
+  <button onclick="napThe()">Nạp</button>
+
+  <h3>Mua đơn vị</h3>
+  <p>1 ĐV = 10.000đ</p>
+  <button onclick="mua()">Mua 1 ĐV</button>
+  <p>Đơn vị của bạn: <b id="dv">0</b></p>
+
+  <br>
+  <button onclick="logout()">Đăng xuất</button>
+</div>
+
+<script>
+let currentUser = null;
+
+function register(){
+  let u = user.value;
+  let p = pass.value;
+  if(!u || !p) return alert("Nhập đủ");
+  if(localStorage.getItem(u)) return alert("Tài khoản tồn tại");
+
+  let data = {pass:p, money:0, dv:0};
+  localStorage.setItem(u, JSON.stringify(data));
+  alert("Đăng ký thành công");
+}
+
+function login(){
+  let u = user.value;
+  let p = pass.value;
+  let data = localStorage.getItem(u);
+  if(!data) return alert("Sai tài khoản");
+
+  data = JSON.parse(data);
+  if(data.pass !== p) return alert("Sai mật khẩu");
+
+  currentUser = u;
+  showShop();
+}
+
+function showShop(){
+  auth.style.display = "none";
+  shop.style.display = "block";
+  name.innerText = currentUser;
+  update();
+}
+
+function update(){
+  let data = JSON.parse(localStorage.getItem(currentUser));
+  money.innerText = data.money;
+  dv.innerText = data.dv;
+}
+
+function napThe(){
+  let code = card.value;
+  let data = JSON.parse(localStorage.getItem(currentUser));
+
+  // demo: mã 123 = 50k
+  if(code === "123"){
+    data.money += 50000;
+    alert("Nạp thành công 50.000đ");
+  }else{
+    return alert("Thẻ sai (demo chỉ có mã 123)");
+  }
+
+  localStorage.setItem(currentUser, JSON.stringify(data));
+  update();
+}
+
+function mua(){
+  let data = JSON.parse(localStorage.getItem(currentUser));
+  if(data.money < 10000) return alert("Không đủ tiền");
+
+  data.money -= 10000;
+  data.dv += 1;
+  localStorage.setItem(currentUser, JSON.stringify(data));
+  update();
+}
+
+function logout(){
+  location.reload();
+}
+</script>
+</body>
+  </html>
